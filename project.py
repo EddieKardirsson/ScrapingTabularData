@@ -76,4 +76,33 @@ rows.pop(0)
 for r in rows:
     australia_table.append(extract_row_data(columns, r))
 
-print(australia_table[0])
+# print(australia_table[0])
+
+def clean_row_data(row: dict):
+    for k in row.keys():
+        val = row[k]
+        if val.text.strip() == "":
+            row[k] = "No data"
+        links = val.find_all('a')
+        for l in links:
+            if l.get('title') is not None and '(page does not exist)' in l.get('title'):
+                l.replace_with(l.text)
+            if 'cite' in l.get('href'):
+                l.parent.decompose()
+        if k == 'Old-growth-extent' and row[k] != 'No data':
+            data = row[k].text.strip()
+            data = data.replace('\xa0', ' ')
+            data = re.search('\d+(?:,\d{3})*(?:\.\d*)? (?:hectares|square kilometres|ha|acres)', data).group()
+
+            parent = row[k].parent
+            row[k].decompose()
+
+            new_tag = soup.new_tag('td')
+            new_tag.string = data
+            parent.append(new_tag)
+
+            row[k] = new_tag
+
+    return row
+
+print(clean_row_data(australia_table[6]))
