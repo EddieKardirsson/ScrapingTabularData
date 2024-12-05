@@ -67,9 +67,15 @@ australia_table = []
 def extract_row_data(columns, row):
     row_data = {}
     table_cells = row.find_all('td')
-    for i in range(len(table_cells)):
-        row_data[columns[i]] = table_cells[i]
-
+    if len(columns) < len(table_cells):
+        print(f"Warning: table has more columns than expected. Expected {len(columns)} columns, but found {len(table_cells)}")
+        for i in range(len(columns)):
+            row_data[columns[i]] = table_cells[i]
+        for i in range(len(columns), len(table_cells)):
+            row_data[f'Unknown Column {i}'] = table_cells[i]
+    else:
+        for i in range(len(table_cells)):
+            row_data[columns[i]] = table_cells[i]
     return row_data
 
 rows.pop(0)
@@ -105,4 +111,27 @@ def clean_row_data(row: dict):
 
     return row
 
-print(clean_row_data(australia_table[6]))
+# print(clean_row_data(australia_table[6]))
+
+def prepare_table_data(columns, table):
+    table_data = []
+
+    rows = table.find_all('tr')
+    rows.pop(0)
+
+    for r in rows:
+        r = extract_row_data(columns, r)
+        r = clean_row_data(r)
+        table_data.append(r)
+
+    return table_data
+
+def prepare_all_tables(columns, data):
+    for k in data.keys():
+        data[k] = prepare_table_data(columns, data[k])
+
+    return data
+
+data = prepare_all_tables(columns, data)
+print(len(data), '\n')
+print('FINAL DATA TEST: ', data['Europe'])
