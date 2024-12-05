@@ -59,5 +59,21 @@ row_data = {}
 for i in range(len(table_cells)):
     row_data[columns[i]] = table_cells[i]
 
-print(row_data['Country'])
-print(row_data['Old-growth forest type'])
+# print(row_data['Country'])
+# print(row_data['Old-growth forest type'])
+
+australia_table = []
+
+def extract_row_data(columns, row):
+    row_data = {}
+    table_cells = row.find_all('td')
+    for i in range(len(table_cells)):
+        row_data[columns[i]] = table_cells[i]
+
+    return row_data
+
+rows.pop(0)
+for r in rows:
+    australia_table.append(extract_row_data(columns, r))
+
+print(australia_table[0])
