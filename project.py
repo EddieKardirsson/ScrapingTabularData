@@ -204,4 +204,20 @@ for row in bulgaria_rows:
 
 print('Forest total (ha): ', forest_total, ' ha\n')
 
-print('Percentage of Bulgarian land area accounted for by old-growth forest: ', round((forest_total / b_area) * 100, 2), '%')
+print('Percentage of Bulgarian land area accounted for by old-growth forest: ', round((forest_total / b_area) * 100, 2), '%\n')
+
+
+# How many different U.S. states have forests with some variety of Oak tree?
+
+us_table = data['United States']
+states = set()
+for r in us_table:
+    if 'Old-growth forest type' not in r:
+        r['Old-growth forest type'] = 'No data'
+    f_type = r['Old-growth forest type']
+    if f_type is not None and f_type!= 'No data':
+        if 'oak' in f_type.text.lower():
+            states.add(r['Country'].text.strip())
+
+print(states, '\n')
+print('U.S. states with oak trees: ', len(states), '\n')
