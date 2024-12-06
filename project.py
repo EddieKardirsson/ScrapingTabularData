@@ -68,7 +68,7 @@ def extract_row_data(columns, row):
     row_data = {}
     table_cells = row.find_all('td')
     if len(columns) < len(table_cells):
-        print(f"Warning: table has more columns than expected. Expected {len(columns)} columns, but found {len(table_cells)}")
+        print(f"Warning: table has more columns than expected. Expected {len(columns)} columns, but found {len(table_cells)} \n")
         for i in range(len(columns)):
             row_data[columns[i]] = table_cells[i]
         for i in range(len(columns), len(table_cells)):
@@ -133,5 +133,32 @@ def prepare_all_tables(columns, data):
     return data
 
 data = prepare_all_tables(columns, data)
-print(len(data), '\n')
-print('FINAL DATA TEST: ', data['Europe'])
+# print(len(data), '\n')
+# print('FINAL DATA TEST: ', data['Europe'])
+
+# print(data['Australia'][3]['Old-growth extent'].text, '\n')
+
+# How many of the listed forests are in France?
+europe = data['Europe']
+france = [r for r in europe if 'France' in r['Country'].text]
+print(len(france), '\n')
+
+# How many of these forests are in the Tasmanian subregion?
+australia = data['Australia']
+tasmania = [r for r in australia if 'Tasmania' in r['Area'].text]
+print(len(tasmania), '\n')
+
+# Of those that has data in the Tasmanian list, what is the total land area?
+tasmania_area_data = [r for r in tasmania if r['Old-growth extent'] != 'No data']
+total = 0
+for r in tasmania_area_data:
+    area = r['Old-growth extent'].text
+    area = area.replace(',', '')
+    val = re.search('\d*', area).group()
+    val = float(val)
+
+    if 'square kilometres' in area:
+        val *= 100
+    total += val
+
+print('Total area for Tasmanian forests: ',total, ' ha\n')
