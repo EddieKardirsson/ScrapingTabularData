@@ -162,3 +162,46 @@ for r in tasmania_area_data:
     total += val
 
 print('Total area for Tasmanian forests: ',total, ' ha\n')
+
+# What percentage of the total land area of Bulgaria is covered by old-growth forests?
+bulgaria_rows = []
+for row in data['Europe']:
+    if row['Country'].text.strip() == 'Bulgaria':
+        bulgaria_rows.append(row)
+
+bulgaria_link = 'https://wikipedia.org' + bulgaria_rows[0]['Country'].a['href']
+bulgaria_filepath = './html_docs/bulgaria.html'
+
+if not os.path.exists(bulgaria_filepath):
+    get_html(bulgaria_link, bulgaria_filepath)
+
+with open(bulgaria_filepath, 'r', encoding='utf8') as f:
+    bulgaria_html = f.read()
+
+bulgaria_soup = BeautifulSoup(bulgaria_html, 'html.parser')
+
+def get_bulgaria_area(tag):
+    return tag.name == 'td' and 'km' in tag.text and 'Total' in tag.parent.text
+
+km_tags = [t.text for t in bulgaria_soup.find_all(get_bulgaria_area)]
+area_tag = km_tags[0]
+
+b_area = re.search('\d+(?:,\d{3})*(?:\.\d*)?', area_tag).group()
+b_area = float(b_area.replace(',', ''))
+print('Bulgaria area (sq km): ', b_area, ' km^2')
+
+b_area *= 100
+print('Bulgaria area (hectares): ', b_area, ' ha\n')
+
+forest_total = 0
+for row in bulgaria_rows:
+    forest_data = row['Old-growth extent'].text
+    forest_data = re.search('\d+(?:,\d{3})*(?:\.\d*)?', forest_data).group()
+    forest_data = forest_data.replace(',', '')
+    forest_data = float(forest_data)
+
+    forest_total += forest_data
+
+print('Forest total (ha): ', forest_total, ' ha\n')
+
+print('Percentage of Bulgarian land area accounted for by old-growth forest: ', round((forest_total / b_area) * 100, 2), '%')
